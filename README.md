@@ -1,1 +1,5 @@
-# mkdocs plugin for resolving redirects
+# mkdocs hook & plugin for resolving redirects
+
+requirements -- 
+
+

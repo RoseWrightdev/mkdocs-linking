@@ -11,8 +11,8 @@ from typing import Any, Dict, List, Tuple
 # Ensure the current directory is in sys.path so 'redirects' can be imported
 sys.path.insert(0, str(Path(__file__).parent))
 
-from redirects import on_config
-from redirects import prepare_docs
+from linking import on_config
+from linking import prepare_docs
 
 
 class TestMigrationScript(unittest.TestCase):
