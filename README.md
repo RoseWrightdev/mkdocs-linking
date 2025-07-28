@@ -69,4 +69,4 @@ hooks:
 
 This script relies on two MkDocs plugins. Install them using pip:
 
-pip install mkdocs-redirects mkdocs-macros-plugin  
+pip install mkdocs-redirects mkdocs-macros-plugin
