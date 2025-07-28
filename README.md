@@ -47,7 +47,7 @@ Once you have reorganized the files, the script works automatically with the mkd
 ## **Configuration**
 
 To enable the script, add it to your mkdocs.yml file as a hook.
-
+```yaml
 \# mkdocs.yml
 
 \# ... other configurations ...
@@ -64,6 +64,7 @@ plugins:
 \# Add the hook to run the script during the build.  
 hooks:  
   \- linking.py
+```
 
 ## **Prerequisites**
 
