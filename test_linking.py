@@ -1,4 +1,4 @@
-"""Tests for the redirects.py documentation migration script."""
+"""Tests for the linking.py documentation migration script."""
 
 import json
 import shutil
@@ -8,7 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Dict, List, Tuple
 
-# Ensure the current directory is in sys.path so 'redirects' can be imported
+# Ensure the current directory is in sys.path so 'linking' can be imported
 sys.path.insert(0, str(Path(__file__).parent))
 
 from linking import on_config
