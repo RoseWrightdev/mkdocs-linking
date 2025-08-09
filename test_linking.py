@@ -31,13 +31,13 @@ class TestMigrationScript(unittest.TestCase):
         # The script under test uses module-level globals for configuration.
         # To ensure tests are isolated, we temporarily redirect these globals
         # to point to our test directory during test execution.
-        self.redirects_module = sys.modules['redirects']
+        self.linking_module = sys.modules['linking']
         self.original_globals = {
-            'DOCS_DIR': self.redirects_module.DOCS_DIR,
-            'REDIRECT_MAP_FILE': self.redirects_module.REDIRECT_MAP_FILE,
+            'DOCS_DIR': self.linking_module.DOCS_DIR,
+            'REDIRECT_MAP_FILE': self.linking_module.REDIRECT_MAP_FILE,
         }
-        self.redirects_module.DOCS_DIR = self.docs_path
-        self.redirects_module.REDIRECT_MAP_FILE = self.redirect_map_file
+        self.linking_module.DOCS_DIR = self.docs_path
+        self.linking_module.REDIRECT_MAP_FILE = self.redirect_map_file
 
     def tearDown(self) -> None:
         """Clean up the temporary directory after each test."""
@@ -45,7 +45,7 @@ class TestMigrationScript(unittest.TestCase):
         # Restore the original global variables to avoid side-effects between
         # test runs.
         for key, value in self.original_globals.items():
-            setattr(self.redirects_module, key, value)
+            setattr(self.linking_module, key, value)
 
     def test_prepare_fresh_run_no_frontmatter(self) -> None:
         """Test that IDs are correctly injected into files."""
