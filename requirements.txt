@@ -1,3 +1,8 @@
 # these are required plugins
 mkdocs-macros-plugin
 mkdocs-redirects
+# Core dependencies
+# None - this tool uses only the Python standard library
+
+# Development dependencies
+coverage>=7.0  # For test coverage analysis
