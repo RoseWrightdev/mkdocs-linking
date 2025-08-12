@@ -16,7 +16,7 @@ The migration process is managed in three phases.
 
 ### **Phase 1: Preparation**
 
-This is a one-time setup step to prepare your documentation for the migration.
+This is a **one-time** setup step to prepare your documentation for the migration.
 
 1. **Run the script in \--prepare mode:**  
    python redirects.py \--prepare

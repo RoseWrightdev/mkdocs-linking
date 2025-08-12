@@ -1,0 +1,11 @@
+site_name: My Docs
+plugins:
+- search
+- macros:
+    module_name: main
+- redirects:
+    redirect_maps:
+      test.md: wooo/page.md
+      page.md: wooo/page.md
+hooks:
+- linking.py
