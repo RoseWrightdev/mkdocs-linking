@@ -47,41 +47,26 @@ class PageResolver:
     
     def resolve_page_link(self, page_id: str, current_page_path: Optional[str] = None) -> str:
         """Resolve a page ID to its Markdown file reference, relative to current page."""
+        import os
         # Build cache on first use
         if self._page_cache is None:
             self._page_cache = self._build_page_cache()
-        
+
         file_path = self._page_cache.get(page_id)
         if not file_path:
             raise ValueError(f"Page with ID '{page_id}' not found")
-        
+
         target_path = file_path.relative_to(self.docs_dir)
-        
+
         # If no current page context, return absolute path from docs root
         if not current_page_path:
             return str(target_path)
-        
+
         # Calculate relative path from current page to target page
         current_path = Path(current_page_path)
         current_dir = current_path.parent
-        
-        # For wooo/thingy.md → page.md case:
-        # current_page_path = "wooo/thingy.md"
-        # current_dir = "wooo"
-        # target_path = "page.md"
-        # Need result: "../page.md"
-        
-        if current_dir == Path('.'):
-            # Current page is in docs root
-            return str(target_path)
-        else:
-            # Need to go up from subdirectory
-            up_levels = len(current_dir.parts)
-            up_dirs = ['..'] * up_levels
-            if up_dirs:
-                return '/'.join(up_dirs + [str(target_path)])
-            else:
-                return str(target_path)
+        rel_path = os.path.relpath(str(target_path), str(current_dir))
+        return rel_path.replace(os.path.sep, "/")
 
 
 def define_env(env):

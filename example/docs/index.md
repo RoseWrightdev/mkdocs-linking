@@ -21,4 +21,4 @@ For full documentation visit [mkdocs.org](https://www.mkdocs.org).
 
 [example]({{ internal_link("index") }})
 [page]({{ internal_link("page-example") }})
-[awdawd](page.md)
+

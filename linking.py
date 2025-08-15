@@ -113,9 +113,11 @@ def on_config(config: Dict[str, Any]) -> Dict[str, Any]:
     # Step 1: Initialize redirect_maps for the redirects plugin
     for plugin_name, plugin_instance in config.get('plugins', {}).items():
         if plugin_name == 'redirects':
-            # Just initialize, don't add redirects here
-            if not hasattr(plugin_instance.config, 'redirect_maps'):
-                plugin_instance.config.redirect_maps = {}
+            # Only handle dict-based plugin representations (MkDocs and tests)
+            if 'config' not in plugin_instance:
+                plugin_instance['config'] = {}
+            if 'redirect_maps' not in plugin_instance['config']:
+                plugin_instance['config']['redirect_maps'] = {}
             print('  Redirects plugin configured.')
             break
 
