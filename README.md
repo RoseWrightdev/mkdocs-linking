@@ -1,74 +1,86 @@
 # **MkDocs Migration Helper**
 
-This repository contains a Python script (linking.py) designed to assist with large-scale documentation refactoring in an [MkDocs](https://www.mkdocs.org/) project. It automates the creation of 301 redirects for moved pages and provides a resilient internal linking mechanism to prevent broken links after a reorganization.
+A command-line utility and plugin hook to support large-scale documentation refactoring for [MkDocs](https://www.mkdocs.org/) projects. 🚀
 
-## **Purpose**
+This tool automates the tedious and error-prone tasks of managing redirects and fixing internal links when you reorganize your documentation, ensuring that your site remains robust and maintainable.
 
-When restructuring a documentation site, manually updating all internal links and creating server-side redirects is tedious and error-prone. This script solves that problem by:
+## **Core Features**
 
-1. **Assigning a permanent, unique ID** to every Markdown file.  
-2. **Automatically generating a redirect map** for moved files that can be used by the mkdocs-redirects plugin.  
-3. **Providing a linking macro** (internal\_link) that uses the permanent ID, making links immune to future file moves.
+* **Permanent Page IDs**: Injects a unique, permanent ID into the frontmatter of every Markdown file, creating a stable reference for each page.  
+* **Resilient Internal Linking**: Provides a command to convert fragile relative links (e.g., ../../api/v1.md) into a robust macro format ({{ internal\_link('api-v1-id') }}) that won't break when files are moved.  
+* **Automatic Redirect Generation**: When you build your site, the script automatically detects moved files and injects the necessary 301 redirect rules into your mkdocs.yml configuration.
 
-## **Workflow**
+## **Installation**
 
-The migration process is managed in three phases.
+This script relies on two MkDocs plugins. Install them using pip:
 
-### **Phase 1: Preparation**
+pip install mkdocs-redirects mkdocs-macros-plugin
 
-This is a **one-time** setup step to prepare your documentation for the migration.
+## **Usage Workflow**
+
+Follow these steps to safely refactor your documentation site.
+
+### **Step 1: Prepare Your Documentation**
+
+This is a **one-time** setup step that prepares your files for refactoring by assigning a unique ID to every page.
 
 1. **Run the script in \--prepare mode:**  
-   python redirects.py \--prepare
+   python linking.py \--prepare
 
 2. **What it does:**  
-   * Scans every .md file in the docs/ directory.  
+   * Scans every .md file in your docs/ directory.  
    * Injects a unique id: into the YAML frontmatter of any file that doesn't have one.  
-   * Creates a redirect\_map.json file, which is a snapshot of the site's structure *before* any files are moved.
+   * Creates a redirect\_map.json file, which is a snapshot of your site's structure *before* any files are moved.
 
-### **Phase 2: Reorganization**
+### **Step 2: Convert Internal Links (Optional but Recommended)**
 
-With the preparation complete, you can now manually move your files and folders into the new desired structure. The permanent IDs ensure that the script can track where each file ends up.
+To make your documentation immune to future link breakage, convert all relative Markdown links to use the resilient macro format.
 
-### **Phase 3: Build**
+1. **Run the script in \--convert-links mode:**  
+   python linking.py \--convert-links
 
-Once you have reorganized the files, the script works automatically with the mkdocs build command.
+2. **What it does:**  
+   * Scans all .md files for relative links pointing to other .md files.  
+   * Replaces each link with the internal\_link macro, using the target page's unique ID.
 
-1. **Update mkdocs.yml** to enable the script as a hook (see below).  
-2. **Run the build:**  
-   mkdocs build
+**Before:**See the \[Authentication Guide\](../../api/v1/auth.md) for more details.
+**After:**See the \[Authentication Guide\]({{ internal\_link('api-v1-auth') }}) for more details.
 
-3. **What it does:**  
-   * The on\_config function in the script runs automatically.  
-   * It compares the current file structure to the redirect\_map.json created in Phase 1\.  
-   * It dynamically generates all necessary redirect rules and configures the mkdocs-redirects plugin.  
-   * It makes the {{ internal\_link('page-id') }} macro available to the mkdocs-macros plugin.
+### **Step 3: Reorganize Your Files**
 
-## **Configuration**
+With the preparation complete, you can now **manually move your files and folders** into the new desired structure. The permanent IDs ensure that the script can track where each file ends up.
 
-To enable the script, add it to your mkdocs.yml file as a hook.
+### **Step 4: Configure mkdocs.yml**
 
-```yaml
+To enable the automated features, you must configure the macros plugin and add the linking.py script as a hook in your mkdocs.yml.
+
 \# mkdocs.yml
 
 \# ... other configurations ...
 
 plugins:  
   \- search  
-  \- redirects:  
-      \# This map will be populated automatically by the hook.  
-      redirect\_maps: {}  
+  \- redirects  \# The hook will automatically update mkdocs.yml with a redirect\_maps section  
   \- macros:  
-      \# The hook will inject the macro function here.  
-      python\_macros: {}
+      module\_name: main \# Assumes your macro function is in main.py
 
 \# Add the hook to run the script during the build.  
 hooks:  
   \- linking.py
-```
 
-## **Prerequisites**
+### **Step 5: Build Your Site**
 
-This script relies on two MkDocs plugins. Install them using pip:
+Now, simply run the standard MkDocs build command. The hook will manage the redirects automatically.
 
-pip install mkdocs-redirects mkdocs-macros-plugin
+mkdocs build
+
+During the build, the linking.py hook compares the new file structure to the original redirect\_map.json and injects redirect rules into mkdocs.yml. Simultaneously, the mkdocs-macros plugin calls the internal\_link function (from main.py) to resolve all macros into the correct, updated relative paths.
+
+## **Command-Line Reference**
+
+| Command                                | Description                                                                         |
+| :------------------------------------- | :---------------------------------------------------------------------------------- |
+| python linking.py \--prepare           | Scans docs/, injects unique IDs into frontmatter, and creates redirect\_map.json.   |
+| python linking.py \--convert-links     | Converts relative Markdown links into the {{ internal\_link(...) }} macro format.   |
+| python linking.py \--docs-dir \<path\> | Specifies a custom documentation directory (default is docs).                       |
+| python linking.py \--dry-run           | Use with \--prepare to preview which files would be changed without modifying them. |
