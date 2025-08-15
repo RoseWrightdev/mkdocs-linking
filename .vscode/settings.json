@@ -4,7 +4,7 @@
     "-s",
     ".",
     "-p",
-    "test_*.py"
+    "./__tests__/test_*.py"
   ],
   "python.testing.pytestEnabled": false,
   "python.testing.unittestEnabled": true

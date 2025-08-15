@@ -2,11 +2,11 @@
 
 ## **Summary**
 
-This pull request introduces a robust tooling solution to facilitate large-scale documentation refactoring within MkDocs. It directly addresses the critical challenge of maintaining link integrity during reorganization, which is functionally impossible to manage manually at scale.
+This pull request introduces a robust tooling solution to facilitate large-scale documentation refactoring within MkDocs. It directly addresses the challenge of maintaining link integrity during reorganization.
 
 The implementation provides a command-line utility and an automated build hook that work together to assign permanent IDs to documents, generate 301 redirects for moved files, and convert fragile relative links into a resilient, future-proof macro format.
 
-This tool serves as the technical foundation for the documentation migration outlined in the [accompanying proposal](http://docs.google.com/main.md), making a safe and efficient refactor achievable.
+This tool serves as the technical foundation for the documentation migration outlined in the [accompanying proposal](https://github.com/kubernetes-sigs/gateway-api/issues/3860), making a safe and efficient refactor achievable.
 
 ## **The Problem**
 
