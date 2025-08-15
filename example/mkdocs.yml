@@ -4,6 +4,5 @@ plugins:
 - macros:
     module_name: main
 - redirects:
-    redirect_maps:
 hooks:
 - linking.py
