@@ -5,7 +5,5 @@ plugins:
     module_name: main
 - redirects:
     redirect_maps:
-      test.md: wooo/page.md
-      page.md: wooo/page.md
 hooks:
 - linking.py

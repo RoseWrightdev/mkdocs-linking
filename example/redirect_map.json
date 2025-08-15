@@ -1,5 +1,7 @@
 {
   "index": "index.md",
-  "page-example": "page.md",
-  "thingy": "wooo/thingy.md"
+  "test-hi-thing": "test/hi/thing.md",
+  "test-lets go-bye": "test/lets go/bye.md",
+  "test-yolo-x": "test/yolo/x.md",
+  "test-lol-me": "test/lol/me.md"
 }

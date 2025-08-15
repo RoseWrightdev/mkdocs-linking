@@ -3,7 +3,6 @@ from pathlib import Path
 import shutil
 import sys
 
-# Add project root to path to allow importing 'main'
 sys.path.insert(0, str(Path(__file__).parent))
 
 from main import PageResolver

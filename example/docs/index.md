@@ -19,6 +19,4 @@ For full documentation visit [mkdocs.org](https://www.mkdocs.org).
         index.md  # The documentation homepage.
         ...       # Other markdown pages, images and other files.
 
-[example]({{ internal_link("index") }})
-[page]({{ internal_link("page-example") }})
-
+[hi]({{internal_link("test-yolo-x")}})
