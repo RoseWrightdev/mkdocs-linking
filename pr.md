@@ -1,117 +1,90 @@
-# **MkDocs Migration Helper Implementation**
+# **feat: Implement MkDocs Migration Helper**
 
-## **Introduction**
+## **Summary**
 
-This pull request implements the automated documentation restructuring system outlined in the [migration proposal](main.md). It's best to think of this as the *technical foundation* for the migration described in that proposal. This tool provides a way to handle changing the file tree without breaking both internal and external links—something that's functionally impossible to do by hand due to time constraints.
+This pull request introduces a robust tooling solution to facilitate large-scale documentation refactoring within MkDocs. It directly addresses the critical challenge of maintaining link integrity during reorganization, which is functionally impossible to manage manually at scale.
+
+The implementation provides a command-line utility and an automated build hook that work together to assign permanent IDs to documents, generate 301 redirects for moved files, and convert fragile relative links into a resilient, future-proof macro format.
+
+This tool serves as the technical foundation for the documentation migration outlined in the [accompanying proposal](http://docs.google.com/main.md), making a safe and efficient refactor achievable.
 
 ## **The Problem**
 
-The migration proposal identified the core challenge: how do we reorganize documentation without breaking links? Manual link maintenance simply doesn't scale when you're dealing with dozens of interconnected files. SEO breaks, internal navigation fragments, and future reorganizations become increasingly complex.
+When restructuring a documentation site, manually updating hundreds of internal links and creating redirects is not only tedious but also highly error-prone. This process often leads to:
+
+* **Broken Internal Links**: Resulting in a fragmented user experience.  
+* **Loss of SEO Rank**: Caused by failing to redirect old URLs.  
+* **Increased Maintenance Burden**: Making future reorganizations even more daunting.
 
 ## **The Solution**
 
-This implementation delivers a 3-phase automated workflow that transforms a manual, error-prone process into something reliable and painless.
+This implementation provides a complete, automated workflow that solves these problems through a powerful command-line script (linking.py) and a seamless build-time integration (main.py).
 
-### **Phase 1: Preparation (Before the move)**
+### **Key Features & Workflow**
 
-```bash
-python3 linking.py --prepare
-```
+The workflow is broken down into three simple, powerful commands:
 
-The script traverses the current `docs` directory. For each `.md` file, it generates a unique, human-readable ID (based on the path, like `how-to-http-routing`). This ID gets injected into the YAML frontmatter of each file. The script then creates a map of the current structure: `unique_id -> old_path`. This map is saved to `redirect_map.json`.
+#### **1\. Prepare (\--prepare)**
 
-### **Phase 2: Manual Reorganization**
+Assigns a unique, permanent ID to every Markdown file and creates a redirect\_map.json to snapshot the site's initial structure.
 
-With the IDs in place, we can now **manually move files and directories** to match the new information architecture. The content of the files is not changed, only their location.
+python linking.py \--prepare
 
-### **Phase 3: Generating Redirects & Fixing Links (Using an `on_config` hook)**
+#### **2\. Convert Links (\--convert-links)**
 
-On `mkdocs build`, the hook script runs. It walks the new file structure and creates an "after" map: `unique_id -> new_path`. The script loads the "before" map and compares it with the "after" map. For any `unique_id` where the path has changed, it programmatically injects a redirect rule into the MkDocs configuration.
+Scans all documents and replaces fragile relative links with a resilient, ID-based macro that is immune to future file moves.
 
-It also provides the `internal_link` macro for resilient internal linking going forward. Instead of writing a fragile relative link like `[My Link](../../section/another-page.md)`, we will the page's unique ID: `{{ internal_link('another-page-id') }}`. The macro looks up the page's current URL and renders the correct link at build time.
+python linking.py \--convert-links
 
-## **What's Implemented**
+Before: \[My Link\](../../section/another-page.md)  
+After: {{ internal\_link('another-page-id') }}
 
-### **Core Features**
+#### **3\. Build (mkdocs build)**
 
-- ID generation: `how-to-guides/http-routing.md` → `how-to-guides-http-routing`
-- YAML frontmatter injection without breaking existing metadata
-- "Before" and "after" state comparison
-- Automatic redirect rule generation
-- `internal_link` macro for future-proof linking
+During the build, the on\_files hook automatically compares the new file structure to the original map and injects all necessary 301 redirect rules directly into your mkdocs.yml configuration. No manual updates are needed.
 
-### **Additional Features**
+## **What's Included**
 
-- `--dry-run` flag to preview changes
-- `--docs-dir` to work with custom directory structures  
-- Unicode and special character support
-- Graceful handling of malformed YAML
+### **Code**
 
-## **Usage**
+* linking.py: The core CLI tool for preparing files, converting links, and generating redirects via the MkDocs hook.  
+* main.py: Provides the internal\_link macro functionality to the mkdocs-macros plugin.
 
-```bash
-# 1. Prepare files with IDs
-python3 linking.py --prepare
+### **Testing**
 
-# 2. Move files manually (Git, file manager, whatever)
-git mv docs/old-structure/* docs/new-structure/
+The implementation is supported by a comprehensive suite of **seven test files** that cover:
 
-# 3. Build - redirects are generated automatically
-mkdocs build
-```
+* Core migration and link conversion functionality.  
+* CLI argument parsing and execution.  
+* Robustness against edge cases like filesystem differences, link breakage scenarios, and malformed YAML frontmatter.
 
-### **Configuration**
+### **Documentation**
 
-Add to your `mkdocs.yml`:
+* README.md: Updated with detailed installation instructions and a clear usage guide.
 
-```yaml
-plugins:
-  - redirects
-  - macros
+## **How to Use**
 
-hooks:
-  - linking.py
-```
+1. **Install Dependencies:**  
+   pip install mkdocs-redirects mkdocs-macros-plugin
 
-### **Future-Proof Links**
+2. **Configure mkdocs.yml:**  
+   plugins:  
+     \- redirects  
+     \- macros:  
+         module\_name: main
 
-```markdown
-<!-- Old fragile way -->
-[HTTP Routing Guide](../../how-to/http-routing.md)
+   hooks:  
+     \- linking.py
 
-<!-- New resilient way -->
-{{ internal_link('how-to-guides-http-routing') }}
-```
+3. **Run the Migration Workflow:**  
+   \# Step 1: Prepare files with unique IDs  
+   python linking.py \--prepare
 
-## **Dependencies**
+   \# Step 2: Convert all relative links to the resilient macro format  
+   python linking.py \--convert-links
 
-- `mkdocs-redirects`: To handle the 301 redirects from old URLs to new ones
-- `mkdocs-macros`: To enable the custom `internal_link` macro
+   \# Step 3: Manually move and reorganize files as needed  
+   git mv docs/old-path/doc.md docs/new-path/doc.md
 
-## **Testing**
-
-The implementation includes 41 test cases covering:
-
-- Basic migration functionality
-- Link breakage scenarios
-- YAML edge cases (malformed frontmatter, Unicode, etc.)
-- Performance with large file sets
-- CLI functionality
-
-## **Files Modified**
-
-- `linking.py` - The main implementation
-- `test_linking.py` - Comprehensive test suite
-- `README.md` - Installation and usage documentation
-
-## **What This Enables**
-
-This tool makes the migration outlined in the proposal actually feasible. Instead of spending days manually updating links and risking broken navigation, the entire process becomes:
-
-```bash
-python3 linking.py --prepare
-# move files to match new structure
-mkdocs build
-```
-
-All redirects are generated automatically. All internal links can be made future-proof. The foundation is in place for the larger documentation reorganization.
+   \# Step 4: Build the site. Redirects are generated automatically.  
+   mkdocs build
