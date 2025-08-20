@@ -4,6 +4,7 @@ from typing import Dict, Any, List, Optional, Tuple
 # Define a constant for the metadata key used to store stable IDs.
 METADATA_KEY = "stable_id"
 
+
 class ResourceNode:
     """
     Represents a node in a hierarchical resource tree.
@@ -11,6 +12,7 @@ class ResourceNode:
     Each node has a name, optional attributes, and a list of children nodes.
     A stable ID is automatically assigned or can be provided in attributes.
     """
+
     def __init__(self, name: str, attributes: Dict[str, Any] = None):
         """
         Initializes a ResourceNode.
@@ -23,11 +25,11 @@ class ResourceNode:
         """
         self.name = name
         self.attributes = attributes if attributes is not None else {}
-        self.children: List['ResourceNode'] = []
+        self.children: List["ResourceNode"] = []
         # Ensure the METADATA_KEY exists in attributes, setting to None if not present.
         self.attributes.setdefault(METADATA_KEY, None)
 
-    def add_child(self, child_node: 'ResourceNode'):
+    def add_child(self, child_node: "ResourceNode"):
         """
         Adds a child node to the current node.
 
@@ -46,6 +48,7 @@ class ResourceNode:
         """
         return self.attributes.get(METADATA_KEY)
 
+
 def assign_keys(node: ResourceNode) -> None:
     """
     Recursively assigns a unique stable ID to each node in the tree if it doesn't already have one.
@@ -60,7 +63,10 @@ def assign_keys(node: ResourceNode) -> None:
     for child in node.children:
         assign_keys(child)
 
-def create_state_snapshot(node: ResourceNode, path_to_root: List[str]) -> Dict[str, Any]:
+
+def create_state_snapshot(
+    node: ResourceNode, path_to_root: List[str]
+) -> Dict[str, Any]:
     """
     Creates a snapshot of the tree's state, mapping stable IDs to their attributes and path.
 
@@ -78,10 +84,7 @@ def create_state_snapshot(node: ResourceNode, path_to_root: List[str]) -> Dict[s
         return {}
 
     # Store the current node's state information.
-    state_map[node.stable_id] = {
-        "path_to_root": path_to_root,
-        "name": node.name
-    }
+    state_map[node.stable_id] = {"path_to_root": path_to_root, "name": node.name}
 
     # Recursively create snapshots for children, adding the current node's ID to the path.
     new_path_for_children = path_to_root + [node.stable_id]
@@ -91,7 +94,10 @@ def create_state_snapshot(node: ResourceNode, path_to_root: List[str]) -> Dict[s
 
     return state_map
 
-def generate_forwarding_rules(before_state: Dict[str, Any], after_state: Dict[str, Any]) -> Dict[Tuple, Any]:
+
+def generate_forwarding_rules(
+    before_state: Dict[str, Any], after_state: Dict[str, Any]
+) -> Dict[Tuple, Any]:
     """
     Generates forwarding rules based on the differences between two state snapshots.
 
@@ -122,12 +128,18 @@ def generate_forwarding_rules(before_state: Dict[str, Any], after_state: Dict[st
             # Create a hashable, immutable key from the dictionary's contents
             # by converting the list to a tuple and creating a tuple of items.
             # This allows the dictionary to be used as a key in another dictionary.
-            hashable_key = tuple(sorted((k, tuple(v) if isinstance(v, list) else v) for k, v in before_attrs.items()))
+            hashable_key = tuple(
+                sorted(
+                    (k, tuple(v) if isinstance(v, list) else v)
+                    for k, v in before_attrs.items()
+                )
+            )
             forwarding_map[hashable_key] = {
                 "new_location_key": key  # The stable ID in the after state is the new location.
             }
 
     return forwarding_map
+
 
 def pretty_print_tree(node: ResourceNode, indent: str = ""):
     """
@@ -140,6 +152,7 @@ def pretty_print_tree(node: ResourceNode, indent: str = ""):
     print(f"{indent}- {node.name} (ID: {node.stable_id})")
     for child in node.children:
         pretty_print_tree(child, indent + "  ")
+
 
 def pretty_print_forwarding_rules(rules: Dict[Tuple, Any]):
     """
@@ -157,10 +170,10 @@ def pretty_print_forwarding_rules(rules: Dict[Tuple, Any]):
         # Convert the tuple key back into a dictionary for readability
         old_state_dict = dict(old_state_tuple)
         # Convert the inner path_to_root tuple back to a list for printing
-        if 'path_to_root' in old_state_dict:
-            old_state_dict['path_to_root'] = list(old_state_dict['path_to_root'])
+        if "path_to_root" in old_state_dict:
+            old_state_dict["path_to_root"] = list(old_state_dict["path_to_root"])
 
-        print(f"\n--- Rule {i+1} ---")
+        print(f"\n--- Rule {i + 1} ---")
         print("  Old State:")
         for key, value in old_state_dict.items():
             print(f"    - {key}: {value}")
